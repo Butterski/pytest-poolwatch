@@ -67,8 +67,8 @@ the standard run. For the larger example, pass `--expected-tests=3000` and
 
 Expected bounds:
 
-- exactly 800 collected, observed, passing test attempts with unique node IDs;
-- configured and peak concurrency of 40;
+- exactly the requested number of collected, observed, passing attempts with unique node IDs;
+- configured and peak concurrency matching the requested slot count;
 - virtual job duration between 60 and 300 seconds (10–50 ms real time).
 
 Utilization and underfill are intentionally not asserted. This is a scheduler
