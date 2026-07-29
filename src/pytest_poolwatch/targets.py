@@ -29,19 +29,22 @@ def discover_target(
         )
 
     plugin_names = {name for name, _plugin in config.pluginmanager.list_name_plugin()}
+    xdist = _has_plugin(config, plugin_names, "xdist", "dsession")
     cooperative = _has_plugin(
         config, plugin_names, "asyncio-cooperative", "pytest_asyncio_cooperative"
     )
-    xdist = _has_plugin(config, plugin_names, "xdist", "dsession")
-
-    cooperative_limit = _cooperative_limit(config) if cooperative else None
     xdist_workers = _xdist_workers(config, intervals) if xdist else None
-    if cooperative_limit is not None and xdist_workers is not None:
-        limit = cooperative_limit * xdist_workers
+    cooperative_limit = _cooperative_limit(config) if cooperative else None
+
+    # xdist and pytest-asyncio-cooperative replace overlapping parts of the
+    # runtest loop and cannot be enabled together reliably. Prefer active xdist
+    # workers instead of multiplying two incompatible capacities. Merely having
+    # xdist installed does not suppress a cooperative-only run.
+    if xdist_workers is not None:
         return TargetSpec(
-            configured=limit,
-            effective=limit,
-            source="pytest-asyncio-cooperative × pytest-xdist",
+            configured=xdist_workers,
+            effective=xdist_workers,
+            source="pytest-xdist",
             confidence="detected",
         )
     if cooperative_limit is not None:
@@ -49,13 +52,6 @@ def discover_target(
             configured=cooperative_limit,
             effective=cooperative_limit,
             source="pytest-asyncio-cooperative",
-            confidence="detected",
-        )
-    if xdist_workers is not None:
-        return TargetSpec(
-            configured=xdist_workers,
-            effective=xdist_workers,
-            source="pytest-xdist",
             confidence="detected",
         )
 

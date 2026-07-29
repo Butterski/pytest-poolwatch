@@ -8,11 +8,13 @@ version = "0.1.0"
 description = "Concurrency profiler and scheduler underfill detector for pytest"
 readme = "README.md"
 requires-python = ">=3.11"
+authors = [{ name = "Butterski" }]
 license = "MIT"
 license-files = ["LICENSE"]
 keywords = ["pytest", "asyncio", "concurrency", "profiling", "xdist"]
 classifiers = [
     "Development Status :: 3 - Alpha",
+    "Environment :: Console",
     "Framework :: Pytest",
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
@@ -21,12 +23,17 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Quality Assurance",
     "Topic :: Software Development :: Testing",
+    "Typing :: Typed",
 ]
 dependencies = ["pytest>=8.2,<10"]
 
 [project.urls]
 Homepage = "https://github.com/Butterski/pytest-poolwatch"
+Documentation = "https://github.com/Butterski/pytest-poolwatch/wiki"
+Repository = "https://github.com/Butterski/pytest-poolwatch"
+Changelog = "https://github.com/Butterski/pytest-poolwatch/blob/master/CHANGELOG.md"
 Issues = "https://github.com/Butterski/pytest-poolwatch/issues"
 
 [project.entry-points.pytest11]
@@ -41,6 +48,9 @@ dev = [
     "ty>=0.0.1a20",
 ]
 demo = ["pytest-asyncio-cooperative==0.40.0"]
+
+[tool.uv.build-backend]
+source-include = ["CHANGELOG.md"]
 
 [tool.pytest.ini_options]
 addopts = "-ra --strict-config --strict-markers"
