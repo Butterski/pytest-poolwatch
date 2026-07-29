@@ -5,6 +5,13 @@ All notable changes to pytest-poolwatch are documented here. The project follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-07-29
+
+### Fixed
+
+- Pin the setup-uv GitHub Action to its official v8.1.0 commit so release
+  workflows resolve the action reliably.
+
 ## [0.1.0] - 2026-07-29
 
 ### Added
@@ -19,6 +26,7 @@ All notable changes to pytest-poolwatch are documented here. The project follows
 - Ignore and documentation markers for workload-specific annotations.
 - Deterministic PR #86 regression and cloud-job stress examples.
 
-[Unreleased]: https://github.com/Butterski/pytest-poolwatch/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Butterski/pytest-poolwatch/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/Butterski/pytest-poolwatch/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Butterski/pytest-poolwatch/releases/tag/v0.1.0
 
