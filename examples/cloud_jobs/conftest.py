@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import argparse
+
 import pytest
 
 from .simulator import build_cases
@@ -12,7 +14,7 @@ DEFAULT_CLOUD_JOB_COUNT = 800
 def _positive_int(raw_value: str) -> int:
     value = int(raw_value)
     if value < 1:
-        raise pytest.UsageError("--cloud-job-count must be at least 1")
+        raise argparse.ArgumentTypeError("must be at least 1")
     return value
 
 
@@ -26,7 +28,10 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         type=_positive_int,
         default=DEFAULT_CLOUD_JOB_COUNT,
         metavar="N",
-        help=f"number of simulated cloud jobs to collect (default: {DEFAULT_CLOUD_JOB_COUNT})",
+        help=(
+            "number of simulated cloud jobs to collect "
+            f"(default: {DEFAULT_CLOUD_JOB_COUNT})"
+        ),
     )
 
 

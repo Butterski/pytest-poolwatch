@@ -1,6 +1,7 @@
 # Cloud-job concurrency demo
 
-This workload gives PoolWatch 800 distinct async tests to observe. Every test:
+This workload gives PoolWatch 800 distinct async tests to observe by default.
+Pass `--cloud-job-count=N` to generate a different number. Every test:
 
 1. reads and submits a small JSON job config;
 2. waits for deterministic, random-looking cloud work lasting 1–5 virtual minutes;
@@ -35,12 +36,34 @@ backticks instead of backslashes.
 The warning filter only silences a known pytest 10 deprecation emitted once per
 test by the upstream cooperative plugin; it does not hide workload failures.
 
+For example, this larger run collects 3,000 identical deterministic job
+definitions for both scheduler versions and targets 150 cooperative slots:
+
+```console
+uv run --no-dev \
+  --with "pytest-asyncio-cooperative @ git+https://github.com/willemt/pytest-asyncio-cooperative@3cac81899122a5034405feaf38ec078e39100ddf" \
+  pytest -p no:asyncio \
+  -W "ignore:FixtureDef.has_location is deprecated:pytest.PytestRemovedIn10Warning" \
+  examples/cloud_jobs/test_cloud_jobs.py \
+  --cloud-job-count=3000 \
+  --max-asyncio-tasks=150 \
+  --poolwatch \
+  --poolwatch-json=.poolwatch/cloud-jobs-3000-fixed.json \
+  --poolwatch-html=.poolwatch/cloud-jobs-3000-fixed.html
+```
+
 Check the report's non-timing invariants:
 
 ```console
 uv run --no-dev python examples/cloud_jobs/assert_report.py \
-  .poolwatch/cloud-jobs.json
+  .poolwatch/cloud-jobs.json \
+  --expected-tests=800 \
+  --expected-concurrency=40
 ```
+
+The two expectation options default to 800 and 40, so they may be omitted for
+the standard run. For the larger example, pass `--expected-tests=3000` and
+`--expected-concurrency=150`.
 
 Expected bounds:
 
@@ -64,7 +87,7 @@ The report checker has no wall-clock upper bound. Its invariants remain valid on
 slow or heavily loaded machines; a sub-second-to-low-seconds runtime is only an
 expected local observation.
 
-For a quick smoke run, select the first 100 generated cases:
+For a quick smoke run, generate 100 cases:
 
 ```console
 uv run --no-dev \
@@ -72,5 +95,6 @@ uv run --no-dev \
   pytest -p no:asyncio \
   examples/cloud_jobs/test_cloud_jobs.py \
   -W "ignore:FixtureDef.has_location is deprecated:pytest.PytestRemovedIn10Warning" \
-  --max-asyncio-tasks=8 -k "cloud-job-00"
+  --cloud-job-count=100 \
+  --max-asyncio-tasks=8
 ```
