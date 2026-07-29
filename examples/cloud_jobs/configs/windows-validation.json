@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "image": "windows-2025",
+  "region": "eu-west-1",
+  "checks": ["schema", "signature", "smoke"]
+}

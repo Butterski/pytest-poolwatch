@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "image": "ubuntu-24.04",
+  "region": "eu-central-1",
+  "checks": ["schema", "security", "smoke"]
+}

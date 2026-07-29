@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "image": "package-index-snapshot",
+  "region": "ap-southeast-1",
+  "checks": ["metadata", "licenses", "dependencies"]
+}

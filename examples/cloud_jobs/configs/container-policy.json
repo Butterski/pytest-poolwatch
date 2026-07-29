@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "image": "python:3.13-slim",
+  "region": "us-east-1",
+  "checks": ["sbom", "vulnerabilities", "policy"]
+}

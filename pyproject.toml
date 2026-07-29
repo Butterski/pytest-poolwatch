@@ -1,0 +1,75 @@
+[build-system]
+requires = ["uv_build>=0.9.0,<0.12.0"]
+build-backend = "uv_build"
+
+[project]
+name = "pytest-poolwatch"
+version = "0.1.0"
+description = "Concurrency profiler and scheduler underfill detector for pytest"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["pytest", "asyncio", "concurrency", "profiling", "xdist"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = ["pytest>=8.2,<10"]
+
+[project.urls]
+Homepage = "https://github.com/Butterski/pytest-poolwatch"
+Issues = "https://github.com/Butterski/pytest-poolwatch/issues"
+
+[project.entry-points.pytest11]
+poolwatch = "pytest_poolwatch.plugin"
+
+[dependency-groups]
+dev = [
+    "pytest-asyncio>=1.0",
+    "pytest-cov>=6.0",
+    "pytest-xdist>=3.6",
+    "ruff>=0.12",
+    "ty>=0.0.1a20",
+]
+demo = ["pytest-asyncio-cooperative==0.40.0"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["pytest_poolwatch"]
+parallel = true
+patch = ["subprocess"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+extend-exclude = ["README.md"]
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "RUF", "SIM", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+"src/pytest_poolwatch/reporting.py" = ["E501"]
+"src/pytest_poolwatch/targets.py" = ["RUF001"]
+
+[tool.ty.src]
+include = ["src", "tests"]
+

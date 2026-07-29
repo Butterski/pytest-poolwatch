@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.2"
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync --locked --dev
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run ty check
+      - run: uv run coverage erase
+      - run: uv run coverage run -m pytest
+      - run: uv run coverage combine
+      - run: uv run coverage report
+      - run: uv run coverage xml
+      - run: uv build
+      - run: uv pip install --system --force-reinstall dist/*.whl
+      - run: pytest --help | grep -- --poolwatch
+
+  pr86-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.2"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: uv sync --locked --no-dev --group demo
+      - name: Observe the released pre-fix scheduler
+        run: >-
+          uv run --no-dev --group demo pytest -p no:asyncio
+          examples/pr86/test_workload.py --max-asyncio-tasks=4 --poolwatch
+          --poolwatch-underfill-threshold=0.05
+          --poolwatch-json=.poolwatch/pr86-before.json
+      - run: uv run --no-dev python examples/pr86/assert_report.py before .poolwatch/pr86-before.json
+      - name: Observe PR #86 fixed commit
+        run: >-
+          uv run --no-dev
+          --with "pytest-asyncio-cooperative @ git+https://github.com/willemt/pytest-asyncio-cooperative@3cac81899122a5034405feaf38ec078e39100ddf"
+          pytest -p no:asyncio examples/pr86/test_workload.py
+          --max-asyncio-tasks=4 --poolwatch
+          --poolwatch-underfill-threshold=0.05
+          --poolwatch-json=.poolwatch/pr86-after.json
+      - run: uv run --no-dev python examples/pr86/assert_report.py after .poolwatch/pr86-after.json
+
+  cloud-job-stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.2"
+          enable-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: uv sync --locked --no-dev
+      - name: Observe 800 simulated cloud jobs
+        run: >-
+          uv run --no-dev
+          --with "pytest-asyncio-cooperative @ git+https://github.com/willemt/pytest-asyncio-cooperative@3cac81899122a5034405feaf38ec078e39100ddf"
+          pytest -q -p no:asyncio
+          -W "ignore:FixtureDef.has_location is deprecated:pytest.PytestRemovedIn10Warning"
+          examples/cloud_jobs/test_cloud_jobs.py
+          --max-asyncio-tasks=40 --poolwatch
+          --poolwatch-json=.poolwatch/cloud-jobs.json
+          --poolwatch-html=.poolwatch/cloud-jobs.html
+      - run: uv run --no-dev python examples/cloud_jobs/assert_report.py .poolwatch/cloud-jobs.json
